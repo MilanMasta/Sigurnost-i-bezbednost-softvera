@@ -1,29 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.ServiceModel;
-using Contracts;
-using System.ServiceModel.Security;
-using Manager;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
+using System.ServiceModel;
+using System.ServiceModel.Security;
+using System.Text;
+using Contracts;
+using Manager;
 
-namespace ServiceApp
+namespace MonitoringServiceApp
 {
-	public class Program
-	{
-		static void Main(string[] args)
-		{
+    class Program
+    {
+        static void Main(string[] args)
+        {
             /// srvCertCN.SubjectName should be set to the service's username. .NET WindowsIdentity class provides information about Windows user running the given process
             string srvCertCN = "wcfservice";
 
             NetTcpBinding binding = new NetTcpBinding();
             binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
 
-            string address = "net.tcp://localhost:9999/Receiver";
-            ServiceHost host = new ServiceHost(typeof(WCFService));
-            host.AddServiceEndpoint(typeof(IWCFContract), binding, address);
+            string address = "net.tcp://localhost:9999/Monitor";
+            ServiceHost host = new ServiceHost(typeof(MonitoringService));
+            host.AddServiceEndpoint(typeof(IMonitoringContract), binding, address);
 
             ///Custom validation mode enables creation of a custom validator - CustomCertificateValidator
             host.Credentials.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;
@@ -37,7 +36,7 @@ namespace ServiceApp
             try
             {
                 host.Open();
-                Console.WriteLine("WCFService is started.\nPress <enter> to stop ...");
+                Console.WriteLine("Monitoring service is started.\nPress <enter> to stop ...");
                 Console.ReadLine();
             }
             catch (Exception e)
@@ -49,6 +48,6 @@ namespace ServiceApp
             {
                 host.Close();
             }
-		}
-	}
+        }
+    }
 }
