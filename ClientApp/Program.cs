@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ServiceModel;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using Manager;
 
 namespace ClientApp
@@ -12,27 +13,25 @@ namespace ClientApp
 	{
 		static void Main(string[] args)
 		{
-			/// Define the expected service certificate. It is required to establish cmmunication using certificates.
-			string srvCertCN = String.Empty;
+            /// Define the expected service certificate. It is required to establish cmmunication using certificates.
+            string srvCertCN = "wcfservice";
 
-			
-			NetTcpBinding binding = new NetTcpBinding();
-			binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+            NetTcpBinding binding = new NetTcpBinding();
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
 
-			/// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
-			X509Certificate2 srvCert = null;
-			EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/Receiver"),
-									  new X509CertificateEndpointIdentity(srvCert));
+            /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
+            X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, srvCertCN);
+            EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/Receiver"),
+                new X509CertificateEndpointIdentity(srvCert));
 
-			using (WCFClient proxy = new WCFClient(binding, address))
-			{
-				/// 1. Communication test
-				proxy.TestCommunication();
-				Console.WriteLine("TestCommunication() finished. Press <enter> to continue ...");
-				Console.ReadLine();				
-			}
-
-			Console.ReadLine();
+            using (WCFClient proxy = new WCFClient(binding, address))
+            {
+                /// 1. Communication test
+                proxy.TestCommunication();
+                proxy.IssueCertificate();
+                Console.WriteLine("TestCommunication() finished. Press <enter> to continue ...");
+                Console.ReadLine();
+            }
 		}
 	}
 }

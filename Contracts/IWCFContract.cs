@@ -9,9 +9,13 @@ namespace Contracts
 	[ServiceContract]
 	public interface IWCFContract
 	{
-		[OperationContract]
-		void TestCommunication();
+        [OperationContract]
+        void TestCommunication();
 
-		
+        [OperationContract]
+        void IssueCertificate();
+
+        [OperationContract]
+        void SendMessage(string message, byte[] sign);
 	}
 }
