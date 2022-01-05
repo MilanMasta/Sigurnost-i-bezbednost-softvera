@@ -13,16 +13,13 @@ namespace ClientApp
 	{
 		static void Main(string[] args)
 		{
-            /// Define the expected service certificate. It is required to establish cmmunication using certificates.
-            string srvCertCN = "wcfservice";
-
             NetTcpBinding binding = new NetTcpBinding();
-            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
+            binding.Security.Mode = SecurityMode.Transport;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Windows;
+            binding.Security.Transport.ProtectionLevel = System.Net.Security.ProtectionLevel.EncryptAndSign;
 
-            /// Use CertManager class to obtain the certificate based on the "srvCertCN" representing the expected service identity.
-            X509Certificate2 srvCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, srvCertCN);
             EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/Receiver"),
-                new X509CertificateEndpointIdentity(srvCert));
+                EndpointIdentity.CreateUpnIdentity("wcfServer"));
 
             using (WCFClient proxy = new WCFClient(binding, address))
             {
@@ -31,6 +28,7 @@ namespace ClientApp
                 proxy.IssueCertificate();
                 Console.WriteLine("TestCommunication() finished. Press <enter> to continue ...");
                 Console.ReadLine();
+
             }
 		}
 	}
