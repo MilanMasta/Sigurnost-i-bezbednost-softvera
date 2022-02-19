@@ -17,5 +17,11 @@ namespace Contracts
 
         [OperationContract]
         void SendMessage(string message, byte[] sign);
-	}
+
+        [OperationContract]
+        void IssueMonitoringPassword();
+
+        [OperationContract]
+        string GetMonitoringPassword();
+    }
 }

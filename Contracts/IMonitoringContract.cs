@@ -12,5 +12,8 @@ namespace Contracts
 
         [OperationContract]
         void TestCommunication();
+
+        [OperationContract]
+        void SendMessageToLogs(string message, byte[] sign);
     }
 }
