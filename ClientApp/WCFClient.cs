@@ -21,7 +21,7 @@ namespace ClientApp
             /// cltCertCN.SubjectName should be set to the client's username. .NET WindowsIdentity class provides information about Windows user running the given process
             string cltCertCN = "wcfclient";
 
-            this.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.None;
+            this.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.ChainTrust;
             this.Credentials.ServiceCertificate.Authentication.RevocationMode = X509RevocationMode.NoCheck;
 
             /// Set appropriate client's certificate on the channel. Use CertManager class to obtain the certificate based on the "cltCertCN"
@@ -76,5 +76,15 @@ namespace ClientApp
                 Console.WriteLine("[SendMessage] ERROR = {0}", e.Message);
             }
 		}
+
+        public void IssueMonitoringPassword()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetMonitoringPassword()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
