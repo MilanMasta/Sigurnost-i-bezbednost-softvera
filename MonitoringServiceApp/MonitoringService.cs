@@ -8,6 +8,11 @@ namespace MonitoringServiceApp
 {
     class MonitoringService: IMonitoringContract
     {
+        public void SendMessageToLogs(string message, byte[] sign)
+        {
+            throw new NotImplementedException();
+        }
+
         public void TestCommunication()
         {
             Console.WriteLine("Hello from monitoring service");

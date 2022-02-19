@@ -31,5 +31,14 @@ namespace ServiceApp
             CertManager.ExportCertificate(cert);
         }
 
-	}
+        public void IssueMonitoringPassword()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetMonitoringPassword()
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
