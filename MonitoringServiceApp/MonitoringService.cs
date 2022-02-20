@@ -1,21 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Principal;
+using System.ServiceModel;
 using System.Text;
 using Contracts;
+using Manager;
 
 namespace MonitoringServiceApp
 {
     class MonitoringService: IMonitoringContract
     {
-        public void SendMessageToLogs(string message, byte[] sign)
+        private string path = "messages.txt";
+        public void SendMessageToLogs(byte[] message)
         {
-            throw new NotImplementedException();
-        }
+            Console.WriteLine($"Message received.");
+            var principal = OperationContext.Current.ServiceSecurityContext.WindowsIdentity;
+            var username = Formatter.ParseName(principal.Name);
+            // decrypt message
+            var keyPath = username + ".key";
+            if (File.Exists(keyPath))
+            {
+                var key = File.ReadAllBytes(keyPath);
+                var iv = File.ReadAllBytes(username + ".IV");
+                var msg = AESManager.Decrypt(message, key, iv);
 
-        public void TestCommunication()
-        {
-            Console.WriteLine("Hello from monitoring service");
+                if (!File.Exists(path))
+                {
+                    File.WriteAllText(path, msg);
+                }
+                else
+                {
+                    File.AppendAllText(path, msg);
+                }
+            }
         }
     }
 }

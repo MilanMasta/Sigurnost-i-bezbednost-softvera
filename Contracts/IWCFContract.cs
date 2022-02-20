@@ -10,18 +10,10 @@ namespace Contracts
 	public interface IWCFContract
 	{
         [OperationContract]
-        void TestCommunication();
-
-        [OperationContract]
         void IssueCertificate();
-
         [OperationContract]
-        void SendMessage(string message, byte[] sign);
-
+        Dictionary<string, int> GetAllActiveUsers();
         [OperationContract]
-        void IssueMonitoringPassword();
-
-        [OperationContract]
-        string GetMonitoringPassword();
+        void Register(int port);
     }
 }

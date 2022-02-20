@@ -8,6 +8,7 @@ using System.ServiceModel.Security;
 using Manager;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using Org.BouncyCastle.Crypto;
 
 namespace ServiceApp
 {
@@ -23,6 +24,12 @@ namespace ServiceApp
             binding.Security.Mode = SecurityMode.Transport;
             binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Windows;
             binding.Security.Transport.ProtectionLevel = System.Net.Security.ProtectionLevel.EncryptAndSign;
+            var cert = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, "TestingCA");
+            if (cert == null)
+            {
+                WCFService.certCA = CertManager.GenerateCACertificate("CN=TestingCA");
+            }
+            WCFService.certCA = CertManager.ReadAsymmetricKeyParameter();
 
             string address = "net.tcp://localhost:9999/Receiver";
             ServiceHost host = new ServiceHost(typeof(WCFService));

@@ -7,10 +7,11 @@ using System.Text;
 namespace Contracts
 {
     [ServiceContract]
-    public interface IMonitoringContract
+    public interface ICommunication
     {
-
         [OperationContract]
-        void SendMessageToLogs(byte[] message);
+        [FaultContract(typeof(FaultException))]
+        void SendMessage(string msg);
+
     }
 }

@@ -7,38 +7,51 @@ using Manager;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using System.ServiceModel;
+using Org.BouncyCastle.Crypto;
+using System.IO;
 
 namespace ServiceApp
 {
 	public class WCFService : IWCFContract
 	{
-       
-
-        public void SendMessage(string message, byte[] sign)
+        public static AsymmetricKeyParameter certCA;
+        private static Dictionary<string, int> activeUsers = new Dictionary<string, int>();
+        public Dictionary<string, int> GetAllActiveUsers()
         {
+            return activeUsers;
         }
-
-        public void TestCommunication()
-		{
-			Console.WriteLine("Communication established.");
-		}
 
         public void IssueCertificate()
         {
-            var certCA = CertManager.GenerateCACertificate("CN=TestingCA");
-            var cert = CertManager.GenerateSelfSignedCertificate("CN=Hekki", "CN=TestingCA", certCA);
+            var principal = OperationContext.Current.ServiceSecurityContext.WindowsIdentity;
+            var username = Formatter.ParseName(principal.Name);
 
+            var cert = CertManager.GenerateSelfSignedCertificate($"CN={username}", "CN=TestingCA", certCA);
             CertManager.ExportCertificate(cert);
+
+            // generate AES key
+            using (AesManaged aes = new AesManaged())
+            {
+                File.WriteAllBytes(username + ".key", aes.Key);
+                File.WriteAllBytes(username + ".IV", aes.IV);
+            }
+
+                // log 
+            Logger.Log($"Certificate generated for user {username}.", System.Diagnostics.EventLogEntryType.Information);
         }
 
-        public void IssueMonitoringPassword()
+        public void Register(int port)
         {
-            throw new NotImplementedException();
-        }
-
-        public string GetMonitoringPassword()
-        {
-            throw new NotImplementedException();
+            var principal = OperationContext.Current.ServiceSecurityContext.WindowsIdentity;
+            var username = Formatter.ParseName(principal.Name);
+            if (activeUsers.ContainsKey(username))
+            {
+                activeUsers[username] = port;
+            }
+            else
+            {
+                activeUsers.Add(username, port);
+            }
         }
     }
 }

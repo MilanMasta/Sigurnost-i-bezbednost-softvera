@@ -18,6 +18,7 @@ using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
+using System.Security.Cryptography;
 
 namespace Manager
 {
@@ -41,7 +42,7 @@ namespace Manager
             /// Check whether the subjectName of the certificate is exactly the same as the given "subjectName"
             foreach (X509Certificate2 c in certCollection)
             {
-                if (c.SubjectName.Name.Equals(string.Format("CN={0}", subjectName)))
+                if (c.SubjectName.Name.Split(',')[0].Equals(string.Format("CN={0}", subjectName)))
                 {
                     return c;
                 }
@@ -150,6 +151,22 @@ namespace Manager
             return x509;
         }
 
+        public static AsymmetricKeyParameter TransformRSAPrivateKey(AsymmetricAlgorithm privateKey)
+        {
+            RSACryptoServiceProvider prov = privateKey as RSACryptoServiceProvider;
+            RSAParameters parameters = prov.ExportParameters(true);
+
+            return new RsaPrivateCrtKeyParameters(
+                new BigInteger(1, parameters.Modulus),
+                new BigInteger(1, parameters.Exponent),
+                new BigInteger(1, parameters.D),
+                new BigInteger(1, parameters.P),
+                new BigInteger(1, parameters.Q),
+                new BigInteger(1, parameters.DP),
+                new BigInteger(1, parameters.DQ),
+                new BigInteger(1, parameters.InverseQ));
+        }
+
         public static AsymmetricKeyParameter GenerateCACertificate(string subjectName, int keyStrength = 2048)
         {
             // Generating Random Numbers
@@ -194,12 +211,30 @@ namespace Manager
 
             // Selfsign certificate
             var certificate = certificateGenerator.Generate(issuerKeyPair.Private, random);
-            var x509 = new System.Security.Cryptography.X509Certificates.X509Certificate2(certificate.GetEncoded());
+            var x509 = new X509Certificate2(certificate.GetEncoded());
 
             // Add CA certificate to Root store
-            AddCertToStore(x509, StoreName.Root, StoreLocation.CurrentUser);
+            AddCertToStore(x509, StoreName.Root, StoreLocation.LocalMachine);
+            AddCertToStore(x509, StoreName.My, StoreLocation.LocalMachine);
+
+            string path = @"privkey.pem";
+            TextWriter textWriter = new StreamWriter(path);
+            PemWriter pemWriter = new PemWriter(textWriter);
+            // passing pair results in the private key being written out
+            pemWriter.WriteObject(issuerKeyPair.Private);
+            pemWriter.WriteObject(issuerKeyPair.Public);
+            pemWriter.Writer.Flush();
+            pemWriter.Writer.Close();
 
             return issuerKeyPair.Private;
+        }
+
+        public static AsymmetricKeyParameter ReadAsymmetricKeyParameter()
+        {
+            var fileStream = System.IO.File.OpenText("privkey.pem");
+            var pemReader = new Org.BouncyCastle.OpenSsl.PemReader(fileStream);
+            var KeyParameter = (Org.BouncyCastle.Crypto.AsymmetricCipherKeyPair)pemReader.ReadObject();
+            return KeyParameter.Private;
         }
 
 
@@ -222,10 +257,13 @@ namespace Manager
 
         public static string ExportCertificate(X509Certificate2 cert)
         {
-            string filename = cert.SubjectName + ".pfx";
-            byte[] certificateBytes = cert.Export(X509ContentType.Pfx);
+            string filename = cert.SubjectName.Name;
 
-            File.WriteAllBytes($"D:\\{filename}", certificateBytes);
+            byte[] certificateBytes = cert.Export(X509ContentType.Cert);
+            File.WriteAllBytes($"{filename}" + ".cer", certificateBytes);
+
+            certificateBytes = cert.Export(X509ContentType.Pfx);
+            File.WriteAllBytes($"{filename}" + ".pfx", certificateBytes);
 
             return filename;
         }

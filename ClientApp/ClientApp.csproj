@@ -53,9 +53,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommuctionClient\CommunicationClient.cs" />
+    <Compile Include="CommunicationService\CommunicationProvider.cs" />
+    <Compile Include="CommunicationService\CommunicationService.cs" />
+    <Compile Include="CommunicationService\CustomAuthorizationPolicy.cs" />
+    <Compile Include="MonitoringClient.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WCFClient.cs" />
+    <Compile Include="WCFCertIssuerSvcClient.cs" />
+    <Compile Include="CommunicationService\X509Principal.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Contracts\Contracts.csproj">

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Manager
 {
@@ -32,6 +33,14 @@ namespace Manager
 			{
 				return winLogonName;
 			}
+		}
+
+		public static string ParseNameFromCert(string certSubject)
+		{
+			var regex = new Regex(@"(CN=)([^\s\,]+)");
+			var clienName = regex.Match(certSubject).Value;
+			clienName = clienName.Substring(3);
+			return clienName;
 		}
 	}
 }
