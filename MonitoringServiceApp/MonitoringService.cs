@@ -28,11 +28,11 @@ namespace MonitoringServiceApp
 
                 if (!File.Exists(path))
                 {
-                    File.WriteAllText(path, msg);
+                    File.WriteAllText(path, msg + ".\n  ");
                 }
                 else
                 {
-                    File.AppendAllText(path, msg);
+                    File.AppendAllText(path, msg + ".\n  ");
                 }
             }
         }

@@ -63,9 +63,11 @@ namespace ClientApp
                 var i = 0;
                 if (list != null)
                 {
+                    var users = new List<String>();
                     foreach(var user in list.Keys)
                     {
                         Console.WriteLine($"{++i}. {user}");
+                        users.Add(user);
                     }
 
                     Console.WriteLine("Select user:");
@@ -81,7 +83,8 @@ namespace ClientApp
 
                     NetTcpBinding tcpBinding = new NetTcpBinding();
                     tcpBinding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
-                    var svcName = list.Keys.ToList()[i-1];
+                    var svcName = list.Keys.ToList()[selected - 1];
+                    Console.WriteLine("Selected user: " + svcName);
                     Console.WriteLine("Waiting for service certificate...");
                     while (CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, svcName) == null) {
                         Thread.Sleep(200);

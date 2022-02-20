@@ -2,6 +2,7 @@
 using Manager;
 using System;
 using System.IO;
+using System.ServiceModel;
 using System.Threading;
 
 namespace ClientApp
@@ -11,8 +12,7 @@ namespace ClientApp
         public void SendMessage(string msg)
         {
             var receiver = Formatter.ParseName(System.Security.Principal.WindowsIdentity.GetCurrent().Name);
-            var sender = Thread.CurrentPrincipal.Identity.Name.Split(';')[0];
-
+            var sender = Formatter.ParseNameFromCert(ServiceSecurityContext.Current.PrimaryIdentity.Name);
 
             Console.WriteLine($"Message received {msg}");
 
